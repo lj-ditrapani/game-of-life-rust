@@ -142,21 +142,21 @@ impl Board {
 
     fn print(&self) {
         let mut t = term::stdout().unwrap();
-        t.bg(term::color::BLACK).unwrap();
+        t.reset().unwrap();
         println!("");
         for row in &self.cells {
             for cell in row.iter() {
                 cell.print(&mut t, true);
             }
-            t.bg(term::color::BLACK).unwrap();
+            t.reset().unwrap();
             println!("");
             for cell in row.iter() {
                 cell.print(&mut t, false);
             }
-            t.bg(term::color::BLACK).unwrap();
+            t.reset().unwrap();
             println!("");
         }
-        t.fg(term::color::WHITE).unwrap();
+        t.reset().unwrap();
     }
 }
 
