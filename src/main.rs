@@ -81,22 +81,16 @@ impl Board {
     }
 
     fn update_neighbor_count(&mut self, i: usize, j: usize) {
-        let p = Point { x: i, y: j };
-        let nc = p.get_neighbor_coords();
-        let l: usize = {
-            let get_live = |&Point { x, y }| { self.cells[x][y].live };
-            nc.iter().map(get_live).filter(|&z| z != true).collect::<Vec<bool>>().len()
-        };
-        let mut x: &mut Cell = &mut (self.cells[i][j]);
-        x.neighbor_count = l as u8;
-        // self.cells[i][j].neighbor_count = l as u8;
+        self.cells[i][j].neighbor_count = self.get_neighbor_count(i, j);
     }
 
     fn get_neighbor_count(&self, i: usize, j: usize) -> u8 {
         let p = Point { x: i, y: j };
-        let nc = p.get_neighbor_coords();
-        let get_live = |&Point { x, y }| { self.cells[x][y].live };
-        nc.iter().map(get_live).filter(|&z| z != true).collect::<Vec<bool>>().len() as u8
+        p.get_neighbor_coords().iter()
+            .map(|&Point { x, y }| { self.cells[x][y].live })
+            .filter(|&z| z == true)
+            .collect::<Vec<bool>>()
+            .len() as u8
     }
 }
 
@@ -225,23 +219,21 @@ mod tests {
     #[test]
     fn update_neighbor_count() {
         let mut board = Board::new();
-        let c = board.cells[0][0];
         board.update_neighbor_count(0, 0);
-        assert_eq!(c.neighbor_count, 0);
+        assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
         board.cells[9][9].on();
         board.update_neighbor_count(0, 0);
-        assert_eq!(c.neighbor_count, 2);
+        assert_eq!(board.cells[0][0].neighbor_count, 2);
     }
 
     #[test]
     fn update_neighbor_counts() {
         let mut board = Board::new();
-        let c = board.cells[0][0];
         board.update_neighbor_counts();
-        assert_eq!(c.neighbor_count, 0);
+        assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
         board.update_neighbor_counts();
-        assert_eq!(c.neighbor_count, 1);
+        assert_eq!(board.cells[0][0].neighbor_count, 1);
     }
 }
