@@ -67,6 +67,7 @@ impl Cell {
     }
 
     fn update_life_state(&mut self) {
+        self.live = self.next_life_state();
     }
 
     fn next_life_state(&self) -> bool {
@@ -178,6 +179,9 @@ mod tests {
 
     #[test]
     fn cell_update_life_state() {
+        let mut c = Cell { neighbor_count: 3, live: false };
+        c.update_life_state();
+        assert_eq!(c.live, true);
     }
 
     #[test]
