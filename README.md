@@ -21,6 +21,3 @@ TODO
 - 16 X 16 is a little small...
 - put tests in separate file
 - Make a crate?
-- Would be so much cooler if it updated the char cells in place ncurses style.
-  I don't see any curses library for rust, but libtcod or piston_window look
-  promising.
