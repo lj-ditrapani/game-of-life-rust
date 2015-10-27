@@ -156,6 +156,7 @@ impl Board {
             t.bg(term::color::BLACK).unwrap();
             println!("");
         }
+        t.fg(term::color::WHITE).unwrap();
     }
 }
 
@@ -211,33 +212,44 @@ fn main() {
         ),
     );
     loop {
+        println!(
+            "1: Blinkers\n\
+             2: Pentadecathlon\n\
+             3: Glider\n\
+             4: R-pentomino\n\
+             5: Diehard\n\
+             6: Acorn\n\
+            "
+        );
+        println!("Pick a demo; enter a number between 1 to {}.\n\
+                 Enter q to quit.", games.len());
         let mut game = String::new();
         std::io::stdin().read_line(&mut game).unwrap();
-        if game.trim() == "quit" {
+        if game.trim() == "q" {
             break;
         }
         let game: usize = match game.trim().parse() {
             Ok(num) => num,
-            Err(e) => {
-                println!("{:?}", e);
+            Err(_) => {
                 println!("Please enter a valid number.");
                 continue;
             }
         };
-        if game >= games.len() {
-            println!("Please enter a number between 0 and {}.", games.len() - 1);
+        if (game == 0) || (game > games.len()) {
+            println!("{} is not between between 1 and {}.", game, games.len());
             continue;
         }
-        let mut board = Board::new(&games[game]);
+        let mut board = Board::new(&games[game - 1]);
         println!("Press Enter to start!");
         loop {
             let mut input = String::new();
             std::io::stdin().read_line(&mut input).unwrap();
-            if input.trim() == "quit" {
+            if input.trim() == "q" {
                 break;
             }
             board.print();
             board.step();
+            println!("Press enter to generate next board.\nEnter q to quit.");
         }
     }
 }

@@ -9,6 +9,6 @@ Author: Lyall Jonathan Di Trapani
 TODO
 ----
 
-- Make some demo programs selectable from list.
 - 16 X 16 is a little small...
 - Make a crate?
+- Would be so much cooler if it updated the char cells in place ncurses style.
