@@ -98,9 +98,9 @@ struct Board {
 }
 
 impl Board {
-    fn new(points: Vec<(usize, usize)>) -> Board {
+    fn new(points: &Vec<(usize, usize)>) -> Board {
         let mut board = Board { cells: [[Cell::new(); SIZE]; SIZE] };
-        for &(x, y) in &points {
+        for &(x, y) in points {
             board.cells[x][y].on();
         }
         board
@@ -160,33 +160,85 @@ impl Board {
 }
 
 fn main() {
-    let coords = vec!(
-        (0, 0),
-        (0, 1),
-        (0, 2),
+    let games = vec!(
+        // Blinkers
+        vec!(
+                                                (2, 9),
+            (3, 3), (3, 4), (3, 5),             (3, 9),
+                                                (4, 9),
+                    (6, 4),
+                    (7, 4),             (7, 8), (7, 9), (7, 10),
+                    (8, 4),
+        ),
 
-        (8, 4),
-        (8, 5),
-        (7, 6),
-        (9, 6),
-        (8, 7),
-        (8, 8),
-        (8, 9),
-        (8, 10),
-        (7, 11),
-        (9, 11),
-        (8, 12),
-        (8, 13),
+        // Pentadecathlon
+        vec!(
+                            (7, 6),
+            (8, 4), (8, 5),         (8, 7), (8, 8), (8, 9), (8, 10),
+                            (9, 6),
+
+            (7, 11),
+                    (8, 12), (8, 13),
+            (9, 11),
+        ),
+
+        // Glider
+        vec!(
+            (0, 0),
+                    (1, 1), (1, 2),
+            (2, 0), (2, 1),
+        ),
+
+        // R-pentomino
+        vec!(
+                    (0, 1), (0, 2),
+            (1, 0), (1, 1),
+                    (2, 1),
+        ),
+
+        // Diehard
+        vec!(
+                                        (4, 9),
+            (5, 3), (5, 4),
+                    (6, 4),     (6, 8), (6, 9), (6, 10),
+        ),
+
+        // Acorn
+        vec!(
+                    (4, 4),
+                                (5, 6),
+            (6, 3), (6, 4),             (6, 7), (6, 8), (6, 9),
+        ),
     );
-    let mut board = Board::new(coords);
     loop {
-        let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
-        if input.trim() == "quit" {
+        let mut game = String::new();
+        std::io::stdin().read_line(&mut game).unwrap();
+        if game.trim() == "quit" {
             break;
         }
-        board.print();
-        board.step();
+        let game: usize = match game.trim().parse() {
+            Ok(num) => num,
+            Err(e) => {
+                println!("{:?}", e);
+                println!("Please enter a valid number.");
+                continue;
+            }
+        };
+        if game >= games.len() {
+            println!("Please enter a number between 0 and {}.", games.len() - 1);
+            continue;
+        }
+        let mut board = Board::new(&games[game]);
+        println!("Press Enter to start!");
+        loop {
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+            if input.trim() == "quit" {
+                break;
+            }
+            board.print();
+            board.step();
+        }
     }
 }
 
@@ -243,7 +295,7 @@ mod tests {
 
     #[test]
     fn new_board() {
-        let b = Board::new(vec!());
+        let b = Board::new(&vec!());
         assert_eq!(b.cells.len(), SIZE);
         assert_eq!(b.cells[0].len(), SIZE);
     }
@@ -311,7 +363,7 @@ mod tests {
 
     #[test]
     fn get_neighbor_count() {
-        let mut board = Board::new(vec!());
+        let mut board = Board::new(&vec!());
         let mut count = board.get_neighbor_count(0, 0);
         assert_eq!(count, 0);
         board.cells[0][1].on();
@@ -322,7 +374,7 @@ mod tests {
 
     #[test]
     fn update_neighbor_count() {
-        let mut board = Board::new(vec!());
+        let mut board = Board::new(&vec!());
         board.update_neighbor_count(0, 0);
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
@@ -333,7 +385,7 @@ mod tests {
 
     #[test]
     fn update_neighbor_counts() {
-        let mut board = Board::new(vec!());
+        let mut board = Board::new(&vec!());
         board.update_neighbor_counts();
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
@@ -344,7 +396,7 @@ mod tests {
     #[test]
     fn update_life_states() {
         let coords = vec!((0, 0), (0, SIZE - 1), (2, 0));
-        let mut board = Board::new(coords);
+        let mut board = Board::new(&coords);
         board.update_neighbor_counts();
         board.update_life_states();
         assert_eq!(board.cells[1][0].live, true);
