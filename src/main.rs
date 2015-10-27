@@ -3,7 +3,7 @@
  */
 
 const SIZE: usize = 10;
-const SIZEi8: i8 = SIZE as i8;
+const SIZE_I8: i8 = SIZE as i8;
 
 type Offset = (i8, i8);
 
@@ -20,19 +20,21 @@ struct Point {
 }
 
 impl Point {
-    fn get_neighbor_coords(&self, nc: &mut NeighborCoords) {
+    fn get_neighbor_coords(&self) -> NeighborCoords {
+        let mut nc = [Point { x: 0, y: 0 }; 8];
         for (p, &(dx, dy)) in nc.iter_mut().zip(NEIGHBOR_OFFSETS.iter()) {
             p.x = Point::compute_point(self.x, dx);
             p.y = Point::compute_point(self.y, dy);
         }
+        nc
     }
 
     fn compute_point(x: usize, dx: i8) -> usize {
         let s: i8 = SIZE as i8;
-        let mut v: i8 = ((x as i8) + dx) % s;
+        let v: i8 = ((x as i8) + dx) % s;
         match v {
             -1 => SIZE - 1,
-            SIZEi8 => 0,
+            SIZE_I8 => 0,
             _ => v as usize,
         }
     }
@@ -40,30 +42,9 @@ impl Point {
 
 type NeighborCoords = [Point; 8];
 
-fn new_neighbor_coords() -> NeighborCoords {
-    [Point { x: 0, y: 0 }; 8]
-}
-
 #[derive(Clone,Copy,Debug)]
 struct Board {
     cells: [[Cell; SIZE]; SIZE]
-}
-
-impl Board {
-    fn new() -> Board {
-        Board { cells: [[Cell::new(); SIZE]; SIZE] }
-    }
-
-    fn update_neighbor_counts(&mut self) {
-        for i in 0..SIZE {
-            for j in 0..SIZE {
-                self.update_neighbor_count(i, j);
-            }
-        }
-    }
-
-    fn update_neighbor_count(&mut self, i: usize, j: usize) {
-    }
 }
 
 #[derive(Clone,Copy,Debug)]
@@ -86,6 +67,39 @@ impl Cell {
     }
 }
 
+impl Board {
+    fn new() -> Board {
+        Board { cells: [[Cell::new(); SIZE]; SIZE] }
+    }
+
+    fn update_neighbor_counts(&mut self) {
+        for i in 0..SIZE {
+            for j in 0..SIZE {
+                self.update_neighbor_count(i, j);
+            }
+        }
+    }
+
+    fn update_neighbor_count(&mut self, i: usize, j: usize) {
+        let p = Point { x: i, y: j };
+        let nc = p.get_neighbor_coords();
+        let l: usize = {
+            let get_live = |&Point { x, y }| { self.cells[x][y].live };
+            nc.iter().map(get_live).filter(|&z| z != true).collect::<Vec<bool>>().len()
+        };
+        let mut x: &mut Cell = &mut (self.cells[i][j]);
+        x.neighbor_count = l as u8;
+        // self.cells[i][j].neighbor_count = l as u8;
+    }
+
+    fn get_neighbor_count(&self, i: usize, j: usize) -> u8 {
+        let p = Point { x: i, y: j };
+        let nc = p.get_neighbor_coords();
+        let get_live = |&Point { x, y }| { self.cells[x][y].live };
+        nc.iter().map(get_live).filter(|&z| z != true).collect::<Vec<bool>>().len() as u8
+    }
+}
+
 fn main() {
     let mut board = Board::new();
     {
@@ -99,7 +113,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{SIZE, Cell, Board, Point, NeighborCoords, new_neighbor_coords, NEIGHBOR_OFFSETS};
+    use super::{SIZE, Cell, Board, Point};
 
     fn set_cell(cell: &mut Cell, live: bool, count: u8) {
         cell.live = live;
@@ -108,20 +122,20 @@ mod tests {
 
     #[test]
     fn new_cell() {
-        let mut c = Cell::new();
+        let c = Cell::new();
         assert_eq!(c.live, false);
         assert_eq!(c.neighbor_count, 0);
     }
 
     #[test]
-    fn Cell_on() {
+    fn cell_on() {
         let mut c = Cell::new();
         c.on();
         assert_eq!(c.live, true);
     }
 
     #[test]
-    fn Cell_off() {
+    fn cell_off() {
         let mut c = Cell::new();
         c.on();
         assert_eq!(c.live, true);
@@ -131,7 +145,7 @@ mod tests {
 
     #[test]
     fn new_board() {
-        let mut b = Board::new();
+        let b = Board::new();
         assert_eq!(b.cells.len(), SIZE);
         assert_eq!(b.cells[0].len(), SIZE);
     }
@@ -152,50 +166,75 @@ mod tests {
 
     #[test]
     fn point_compute_point() {
-        assert_eq!(Point::compute_point(5, 0), 5);
-        assert_eq!(Point::compute_point(1, -1), 0);
-        assert_eq!(Point::compute_point(8, 1), 9);
-        assert_eq!(Point::compute_point(0, -1), 9);
-        assert_eq!(Point::compute_point(9, 1), 0);
+        let tests = [
+            (5, 0, 5),
+            (1, -1, 0),
+            (8, 1, 9),
+            (0, -1, 9),
+            (9, 1, 0),
+        ];
+        for &(x, dx, v) in tests.iter() {
+            assert_eq!(Point::compute_point(x, dx), v);
+        }
     }
 
     #[test]
-    fn test_new_neighbor_coords() {
-        let nc = new_neighbor_coords();
-        assert_eq!(nc.len(), 8);
-        assert_eq!(nc[0].x, 0);
-        assert_eq!(nc[0].y, 0);
-        assert_eq!(nc[7].x, 0);
-        assert_eq!(nc[7].y, 0);
-    }
-
-    #[test]
-    fn get_neighbor_coords() {
-        let mut nc = new_neighbor_coords();
+    fn get_neighbor_coords11() {
         let p = Point { x: 1, y: 1 };
-        p.get_neighbor_coords(&mut nc);
-        assert_eq!(nc[0].x, 0);
-        assert_eq!(nc[0].y, 0);
-        assert_eq!(nc[1].x, 0);
-        assert_eq!(nc[1].y, 1);
-        assert_eq!(nc[2].x, 0);
-        assert_eq!(nc[2].y, 2);
-        assert_eq!(nc[3].x, 1);
-        assert_eq!(nc[3].y, 0);
+        let nc = p.get_neighbor_coords();
+        let tests = [
+            (0, 0, 0),
+            (1, 0, 1),
+            (2, 0, 2),
+            (3, 1, 0),
+        ];
+        for &(i, x, y) in tests.iter() {
+            assert_eq!(nc[i].x, x);
+            assert_eq!(nc[i].y, y);
+        }
     }
 
-    // #[test]
+    #[test]
+    fn get_neighbor_coords00() {
+        let p = Point { x: 0, y: 0 };
+        let nc = p.get_neighbor_coords();
+        let tests = [
+            (0, 9, 9),
+            (1, 9, 0),
+            (2, 9, 1),
+            (3, 0, 9),
+            (4, 0, 1),
+        ];
+        for &(i, x, y) in tests.iter() {
+            assert_eq!(nc[i].x, x);
+            assert_eq!(nc[i].y, y);
+        }
+    }
+
+    #[test]
+    fn get_neighbor_count() {
+        let mut board = Board::new();
+        let mut count = board.get_neighbor_count(0, 0);
+        assert_eq!(count, 0);
+        board.cells[0][1].on();
+        board.cells[9][9].on();
+        count = board.get_neighbor_count(0, 0);
+        assert_eq!(count, 2);
+    }
+
+    #[test]
     fn update_neighbor_count() {
         let mut board = Board::new();
         let c = board.cells[0][0];
         board.update_neighbor_count(0, 0);
         assert_eq!(c.neighbor_count, 0);
         board.cells[0][1].on();
+        board.cells[9][9].on();
         board.update_neighbor_count(0, 0);
-        assert_eq!(c.neighbor_count, 1);
+        assert_eq!(c.neighbor_count, 2);
     }
 
-    // #[test]
+    #[test]
     fn update_neighbor_counts() {
         let mut board = Board::new();
         let c = board.cells[0][0];
