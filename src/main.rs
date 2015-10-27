@@ -252,9 +252,9 @@ mod tests {
         let tests = [
             (5, 0, 5),
             (1, -1, 0),
-            (8, 1, 9),
-            (0, -1, 9),
-            (9, 1, 0),
+            (SIZE - 2, 1, SIZE - 1),
+            (0, -1, SIZE - 1),
+            (SIZE - 1, 1, 0),
         ];
         for &(x, dx, v) in tests.iter() {
             assert_eq!(Point::compute_point(x, dx), v);
@@ -282,10 +282,10 @@ mod tests {
         let p = Point { x: 0, y: 0 };
         let nc = p.get_neighbor_coords();
         let tests = [
-            (0, 9, 9),
-            (1, 9, 0),
-            (2, 9, 1),
-            (3, 0, 9),
+            (0, SIZE - 1, SIZE - 1),
+            (1, SIZE - 1, 0),
+            (2, SIZE - 1, 1),
+            (3, 0, SIZE - 1),
             (4, 0, 1),
         ];
         for &(i, x, y) in tests.iter() {
@@ -300,7 +300,7 @@ mod tests {
         let mut count = board.get_neighbor_count(0, 0);
         assert_eq!(count, 0);
         board.cells[0][1].on();
-        board.cells[9][9].on();
+        board.cells[SIZE - 1][SIZE - 1].on();
         count = board.get_neighbor_count(0, 0);
         assert_eq!(count, 2);
     }
@@ -311,7 +311,7 @@ mod tests {
         board.update_neighbor_count(0, 0);
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
-        board.cells[9][9].on();
+        board.cells[SIZE - 1][SIZE - 1].on();
         board.update_neighbor_count(0, 0);
         assert_eq!(board.cells[0][0].neighbor_count, 2);
     }
@@ -330,12 +330,12 @@ mod tests {
     fn update_life_states() {
         let mut board = Board::new();
         board.cells[0][0].on();
-        board.cells[0][9].on();
+        board.cells[0][SIZE - 1].on();
         board.cells[2][0].on();
         board.update_neighbor_counts();
         board.update_life_states();
         assert_eq!(board.cells[1][0].live, true);
-        assert_eq!(board.cells[1][9].live, true);
+        assert_eq!(board.cells[1][SIZE - 1].live, true);
         assert_eq!(board.cells[1][1].live, false);
     }
 }
