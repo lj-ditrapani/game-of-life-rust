@@ -2,3 +2,6 @@
 name = "life"
 version = "0.1.0"
 authors = ["Lyall Jonathan Di Trapani <lj.ditrapani@gmail.com>"]
+
+[dependencies]
+term = "0.2"

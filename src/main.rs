@@ -1,8 +1,9 @@
 /*  Author:  Lyall Jonathan Di Trapani ----------------------------------------
  *
  */
+extern crate term;
 
-const SIZE: usize = 10;
+const SIZE: usize = 20;
 const SIZE_I8: i8 = SIZE as i8;
 
 type Offset = (i8, i8);
@@ -77,6 +78,21 @@ impl Cell {
             _ => false,
         }
     }
+
+    fn print(&self, t: &mut Box<term::StdoutTerminal>) {
+        match self.live {
+            true => {
+                t.fg(term::color::YELLOW).unwrap();
+                t.bg(term::color::CYAN).unwrap();
+                write!(t, "<>").unwrap();
+            },
+            false => {
+                t.fg(term::color::BRIGHT_BLACK).unwrap();
+                t.bg(term::color::BLUE).unwrap();
+                write!(t, "[]").unwrap();
+            },
+        };
+    }
 }
 
 impl Board {
@@ -85,8 +101,9 @@ impl Board {
     }
 
     fn update_life_states(&mut self) {
-        for row in self.cells.iter_mut() {
-            for cell in row {
+        for row in &mut self.cells {
+            for cell in row.iter_mut() {
+                cell.update_life_state();
             }
         }
     }
@@ -111,17 +128,42 @@ impl Board {
             .collect::<Vec<bool>>()
             .len() as u8
     }
+
+    fn step(&mut self) {
+        self.update_neighbor_counts();
+        self.update_life_states();
+    }
+
+    fn print(&self) {
+        let mut t = term::stdout().unwrap();
+        t.bg(term::color::BLACK).unwrap();
+        println!("");
+        for row in &self.cells {
+            for cell in row.iter() {
+                cell.print(&mut t);
+            }
+            t.bg(term::color::BLACK).unwrap();
+            println!("");
+        }
+    }
 }
 
 fn main() {
     let mut board = Board::new();
     {
-        let mut c: &mut Cell = &mut board.cells[0][1];
-        c.on();
-        c.neighbor_count = 14;
+        board.cells[0][0].on();
+        board.cells[0][1].on();
+        board.cells[0][2].on();
     }
-    board.update_neighbor_counts();
-    println!("\n\n{:?}", board.cells[0][1]);
+    loop {
+        let mut input = String::new();
+        std::io::stdin().read_line(&mut input).unwrap();
+        if input.trim() == "quit" {
+            break;
+        }
+        board.print();
+        board.step();
+    }
 }
 
 #[cfg(test)]
@@ -282,5 +324,18 @@ mod tests {
         board.cells[0][1].on();
         board.update_neighbor_counts();
         assert_eq!(board.cells[0][0].neighbor_count, 1);
+    }
+
+    #[test]
+    fn update_life_states() {
+        let mut board = Board::new();
+        board.cells[0][0].on();
+        board.cells[0][9].on();
+        board.cells[2][0].on();
+        board.update_neighbor_counts();
+        board.update_life_states();
+        assert_eq!(board.cells[1][0].live, true);
+        assert_eq!(board.cells[1][9].live, true);
+        assert_eq!(board.cells[1][1].live, false);
     }
 }
