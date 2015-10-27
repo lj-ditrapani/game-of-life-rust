@@ -3,7 +3,7 @@
  */
 extern crate term;
 
-const SIZE: usize = 20;
+const SIZE: usize = 16;
 const SIZE_I8: i8 = SIZE as i8;
 
 type Offset = (i8, i8);
@@ -44,11 +44,6 @@ impl Point {
 type NeighborCoords = [Point; 8];
 
 #[derive(Clone,Copy,Debug)]
-struct Board {
-    cells: [[Cell; SIZE]; SIZE]
-}
-
-#[derive(Clone,Copy,Debug)]
 struct Cell {
     live: bool,
     neighbor_count: u8,
@@ -63,10 +58,6 @@ impl Cell {
         self.live = true;
     }
 
-    fn off(&mut self) {
-        self.live = false;
-    }
-
     fn update_life_state(&mut self) {
         self.live = self.next_life_state();
     }
@@ -79,25 +70,40 @@ impl Cell {
         }
     }
 
-    fn print(&self, t: &mut Box<term::StdoutTerminal>) {
+    fn print(&self, t: &mut Box<term::StdoutTerminal>, top: bool) {
         match self.live {
             true => {
                 t.fg(term::color::YELLOW).unwrap();
                 t.bg(term::color::CYAN).unwrap();
-                write!(t, "<>").unwrap();
+                match top {
+                    true => write!(t, "/o.o\\").unwrap(),
+                    false => write!(t, "\\---/").unwrap(),
+                }
             },
             false => {
                 t.fg(term::color::BRIGHT_BLACK).unwrap();
                 t.bg(term::color::BLUE).unwrap();
-                write!(t, "[]").unwrap();
+                match top {
+                    true => write!(t, "|    ").unwrap(),
+                    false => write!(t, "|____").unwrap(),
+                }
             },
         };
     }
 }
 
+#[derive(Clone,Copy,Debug)]
+struct Board {
+    cells: [[Cell; SIZE]; SIZE]
+}
+
 impl Board {
-    fn new() -> Board {
-        Board { cells: [[Cell::new(); SIZE]; SIZE] }
+    fn new(points: Vec<(usize, usize)>) -> Board {
+        let mut board = Board { cells: [[Cell::new(); SIZE]; SIZE] };
+        for &(x, y) in &points {
+            board.cells[x][y].on();
+        }
+        board
     }
 
     fn update_life_states(&mut self) {
@@ -140,7 +146,12 @@ impl Board {
         println!("");
         for row in &self.cells {
             for cell in row.iter() {
-                cell.print(&mut t);
+                cell.print(&mut t, true);
+            }
+            t.bg(term::color::BLACK).unwrap();
+            println!("");
+            for cell in row.iter() {
+                cell.print(&mut t, false);
             }
             t.bg(term::color::BLACK).unwrap();
             println!("");
@@ -149,12 +160,25 @@ impl Board {
 }
 
 fn main() {
-    let mut board = Board::new();
-    {
-        board.cells[0][0].on();
-        board.cells[0][1].on();
-        board.cells[0][2].on();
-    }
+    let coords = vec!(
+        (0, 0),
+        (0, 1),
+        (0, 2),
+
+        (8, 4),
+        (8, 5),
+        (7, 6),
+        (9, 6),
+        (8, 7),
+        (8, 8),
+        (8, 9),
+        (8, 10),
+        (7, 11),
+        (9, 11),
+        (8, 12),
+        (8, 13),
+    );
+    let mut board = Board::new(coords);
     loop {
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).unwrap();
@@ -190,15 +214,6 @@ mod tests {
     }
 
     #[test]
-    fn cell_off() {
-        let mut c = Cell::new();
-        c.on();
-        assert_eq!(c.live, true);
-        c.off();
-        assert_eq!(c.live, false);
-    }
-
-    #[test]
     fn cell_next_life_state() {
         let mut c = Cell::new();
         let tests = [
@@ -228,7 +243,7 @@ mod tests {
 
     #[test]
     fn new_board() {
-        let b = Board::new();
+        let b = Board::new(vec!());
         assert_eq!(b.cells.len(), SIZE);
         assert_eq!(b.cells[0].len(), SIZE);
     }
@@ -296,7 +311,7 @@ mod tests {
 
     #[test]
     fn get_neighbor_count() {
-        let mut board = Board::new();
+        let mut board = Board::new(vec!());
         let mut count = board.get_neighbor_count(0, 0);
         assert_eq!(count, 0);
         board.cells[0][1].on();
@@ -307,7 +322,7 @@ mod tests {
 
     #[test]
     fn update_neighbor_count() {
-        let mut board = Board::new();
+        let mut board = Board::new(vec!());
         board.update_neighbor_count(0, 0);
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
@@ -318,7 +333,7 @@ mod tests {
 
     #[test]
     fn update_neighbor_counts() {
-        let mut board = Board::new();
+        let mut board = Board::new(vec!());
         board.update_neighbor_counts();
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
@@ -328,10 +343,8 @@ mod tests {
 
     #[test]
     fn update_life_states() {
-        let mut board = Board::new();
-        board.cells[0][0].on();
-        board.cells[0][SIZE - 1].on();
-        board.cells[2][0].on();
+        let coords = vec!((0, 0), (0, SIZE - 1), (2, 0));
+        let mut board = Board::new(coords);
         board.update_neighbor_counts();
         board.update_life_states();
         assert_eq!(board.cells[1][0].live, true);
