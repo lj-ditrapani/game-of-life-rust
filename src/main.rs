@@ -65,11 +65,29 @@ impl Cell {
     fn off(&mut self) {
         self.live = false;
     }
+
+    fn update_life_state(&mut self) {
+    }
+
+    fn next_life_state(&self) -> bool {
+        match (self.neighbor_count, self.live) {
+            (3, _) => true,
+            (2, true) => true,
+            _ => false,
+        }
+    }
 }
 
 impl Board {
     fn new() -> Board {
         Board { cells: [[Cell::new(); SIZE]; SIZE] }
+    }
+
+    fn update_life_states(&mut self) {
+        for row in self.cells.iter_mut() {
+            for cell in row {
+            }
+        }
     }
 
     fn update_neighbor_counts(&mut self) {
@@ -135,6 +153,31 @@ mod tests {
         assert_eq!(c.live, true);
         c.off();
         assert_eq!(c.live, false);
+    }
+
+    #[test]
+    fn cell_next_life_state() {
+        let mut c = Cell::new();
+        let tests = [
+            (0, true, false),
+            (1, false, false),
+            (2, false, false),
+            (2, true, true),
+            (3, false, true),
+            (3, true, true),
+            (4, true, false),
+            (4, false, false),
+            (5, false, false),
+        ];
+        for &(count, state, next_state) in tests.iter() {
+            c.neighbor_count = count;
+            c.live = state;
+            assert_eq!(c.next_life_state(), next_state);
+        }
+    }
+
+    #[test]
+    fn cell_update_life_state() {
     }
 
     #[test]
