@@ -143,9 +143,9 @@ impl Board {
     fn print(&self) {
         let mut t = term::stdout().unwrap();
         t.reset().unwrap();
-        for i in (0..(SIZE * 2 + 4)) {
-            t.cursor_up();
-            t.delete_line();
+        for _ in (0..(SIZE * 2 + 4)) {
+            t.cursor_up().unwrap();
+            t.delete_line().unwrap();
         }
         println!("");
         for row in &self.cells {
@@ -216,7 +216,7 @@ fn main() {
         ),
     );
     loop {
-        for i in (0..(SIZE * 2)) {
+        for _ in (0..(SIZE * 2)) {
             println!("");
         }
         println!(
