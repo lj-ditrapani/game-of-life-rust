@@ -2,6 +2,13 @@
 name = "life"
 version = "0.1.0"
 authors = ["Lyall Jonathan Di Trapani <lj.ditrapani@gmail.com>"]
+description = "Conway's Game of Life on 2-D toroidal grid in rust."
+license = "MIT"
+homepage = "https://github.com/lj-ditrapani/game-of-life-rust"
+documentation = "https://github.com/lj-ditrapani/game-of-life-rust"
+repository = "https://github.com/lj-ditrapani/game-of-life-rust"
+readme = "README.md"
+kewords = ["Conway's game of life", "toy", "game", "cellular automaton"]
 
 [dependencies]
 term = "0.2"
