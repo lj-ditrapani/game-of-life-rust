@@ -20,4 +20,3 @@ TODO
 
 - 16 X 16 is a little small...
 - put tests in separate file
-- Make a crate?
