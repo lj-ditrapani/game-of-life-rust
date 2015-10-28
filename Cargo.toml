@@ -8,7 +8,7 @@ homepage = "https://github.com/lj-ditrapani/game-of-life-rust"
 documentation = "https://github.com/lj-ditrapani/game-of-life-rust"
 repository = "https://github.com/lj-ditrapani/game-of-life-rust"
 readme = "README.md"
-keywords = ["Conway's game of life", "toy", "game", "cellular automaton"]
+keywords = ["Conways_game_of_life", "game", "toy", "cellular_automaton"]
 
 [dependencies]
 term = "0.2"

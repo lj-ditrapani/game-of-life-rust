@@ -1,6 +1,6 @@
 [root]
 name = "life"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "term 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
