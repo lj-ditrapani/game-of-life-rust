@@ -143,7 +143,7 @@ impl Board {
     fn print(&self) {
         let mut t = term::stdout().unwrap();
         t.reset().unwrap();
-        for _ in (0..(SIZE * 2 + 4)) {
+        for _ in 0..(SIZE * 2 + 4) {
             t.cursor_up().unwrap();
             t.delete_line().unwrap();
         }
@@ -216,7 +216,7 @@ fn main() {
         ),
     );
     loop {
-        for _ in (0..(SIZE * 2)) {
+        for _ in 0..(SIZE * 2) {
             println!("");
         }
         println!(
