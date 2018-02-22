@@ -2,6 +2,8 @@ Conway's Game of Life on 2-D toroidal grid in rust.
 
 An interactive command-line experience.
 
+![glider.png](glider.png)
+
 Steps to success:
 
 1. Start program with `cargo run`
