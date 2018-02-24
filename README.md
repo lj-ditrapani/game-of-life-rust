@@ -18,6 +18,22 @@ You can change the const declaration to adjust the size of the grid.
 Author: Lyall Jonathan Di Trapani
 
 
+Tests
+-----
+
+    cargo test
+
+
+Crate
+-----
+
+<https://crates.io/crates/life>
+
+To publish a new version:
+
+    cargo publish
+
+
 License
 -------
 
