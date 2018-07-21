@@ -333,7 +333,7 @@ mod tests {
     }
 
     #[test]
-    fn point_compute_point() {
+    fn point_value_with_offset() {
         let tests = [
             (5, 0, 5),
             (1, -1, 0),
@@ -342,52 +342,40 @@ mod tests {
             (SIZE - 1, 1, 0),
         ];
         for &(x, dx, v) in tests.iter() {
-            assert_eq!(Point::compute_point(x, dx), v);
+            assert_eq!(Point::value_with_offset(x, dx), v);
         }
     }
 
     #[test]
-    fn get_neighbor_coords11() {
-        let p = Point { x: 1, y: 1 };
-        let nc = p.get_neighbor_coords();
-        let tests = [
-            (0, 0, 0),
-            (1, 0, 1),
-            (2, 0, 2),
-            (3, 1, 0),
-        ];
-        for &(i, x, y) in tests.iter() {
-            assert_eq!(nc[i].x, x);
-            assert_eq!(nc[i].y, y);
-        }
-    }
-
-    #[test]
-    fn get_neighbor_coords00() {
-        let p = Point { x: 0, y: 0 };
-        let nc = p.get_neighbor_coords();
-        let tests = [
-            (0, SIZE - 1, SIZE - 1),
-            (1, SIZE - 1, 0),
-            (2, SIZE - 1, 1),
-            (3, 0, SIZE - 1),
-            (4, 0, 1),
-        ];
-        for &(i, x, y) in tests.iter() {
-            assert_eq!(nc[i].x, x);
-            assert_eq!(nc[i].y, y);
-        }
-    }
-
-    #[test]
-    fn get_neighbor_count() {
+    fn get_neighbor_count11() {
         let mut board = Board::new(&vec!());
-        let mut count = board.get_neighbor_count(0, 0);
-        assert_eq!(count, 0);
+        let count1 = board.get_neighbor_count(1, 1);
+        assert_eq!(count1, 0);
+        board.cells[0][0].on();
+        board.cells[0][1].on();
+        let count2 = board.get_neighbor_count(1, 1);
+        assert_eq!(count2, 2);
+        board.cells[0][2].on();
+        board.cells[1][0].on();
+        let count3 = board.get_neighbor_count(1, 1);
+        assert_eq!(count3, 4);
+    }
+
+    #[test]
+    fn get_neighbor_count00() {
+        let mut board = Board::new(&vec!());
+        let count1 = board.get_neighbor_count(0, 0);
+        assert_eq!(count1, 0);
         board.cells[0][1].on();
         board.cells[SIZE - 1][SIZE - 1].on();
-        count = board.get_neighbor_count(0, 0);
-        assert_eq!(count, 2);
+        let count2 = board.get_neighbor_count(0, 0);
+        assert_eq!(count2, 2);
+        board.cells[1][0].on();
+        board.cells[1][1].on();
+        board.cells[SIZE - 1][1].on();
+        board.cells[0][SIZE - 1].on();
+        let count3 = board.get_neighbor_count(0, 0);
+        assert_eq!(count3, 6);
     }
 
     #[test]
