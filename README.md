@@ -51,6 +51,17 @@ cargo tarpaulin -v
 ```
 
 
+Format
+------
+
+<https://github.com/rust-lang-nursery/rustfmt>
+
+```
+rustup component add rustfmt-preview
+cargo fmt
+```
+
+
 License
 -------
 
