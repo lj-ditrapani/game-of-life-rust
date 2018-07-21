@@ -21,16 +21,7 @@ struct Point {
 }
 
 impl Point {
-    fn get_neighbor_coords(&self) -> NeighborCoords {
-        let mut nc = [Point { x: 0, y: 0 }; 8];
-        for (p, &(dx, dy)) in nc.iter_mut().zip(NEIGHBOR_OFFSETS.iter()) {
-            p.x = Point::compute_point(self.x, dx);
-            p.y = Point::compute_point(self.y, dy);
-        }
-        nc
-    }
-
-    fn compute_point(x: usize, dx: i8) -> usize {
+    fn value_with_offset(x: usize, dx: i8) -> usize {
         let s: i8 = SIZE as i8;
         let v: i8 = ((x as i8) + dx) % s;
         match v {
@@ -39,9 +30,14 @@ impl Point {
             _ => v as usize,
         }
     }
-}
 
-type NeighborCoords = [Point; 8];
+    fn point_with_offset(&self, dx: i8, dy: i8) -> Point {
+        Point {
+            x: Point::value_with_offset(self.x, dx),
+            y: Point::value_with_offset(self.y, dy)
+        }
+    }
+}
 
 #[derive(Clone,Copy,Debug)]
 struct Cell {
@@ -127,9 +123,13 @@ impl Board {
     }
 
     fn get_neighbor_count(&self, i: usize, j: usize) -> u8 {
-        let p = Point { x: i, y: j };
-        p.get_neighbor_coords().iter()
-            .map(|&Point { x, y }| { self.cells[x][y].live })
+        let base_point = Point { x: i, y: j };
+        NEIGHBOR_OFFSETS
+            .iter()
+            .map(|&(dx, dy)| {
+                let neighbor = base_point.point_with_offset(dx, dy);
+                self.cells[neighbor.x][neighbor.y].live
+            })
             .filter(|&z| z == true)
             .count() as u8
     }
