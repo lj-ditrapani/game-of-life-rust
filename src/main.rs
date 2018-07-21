@@ -22,12 +22,9 @@ struct Point {
 
 impl Point {
     fn value_with_offset(x: usize, dx: i8) -> usize {
-        let s: i8 = SIZE as i8;
-        let v: i8 = ((x as i8) + dx) % s;
-        match v {
+        match ((x as i8) + dx) % SIZE_I8 {
             -1 => SIZE - 1,
-            SIZE_I8 => 0,
-            _ => v as usize,
+            v => v as usize,
         }
     }
 
@@ -347,7 +344,7 @@ mod tests {
     }
 
     #[test]
-    fn get_neighbor_count11() {
+    fn get_neighbor_count_11() {
         let mut board = Board::new(&vec!());
         let count1 = board.get_neighbor_count(1, 1);
         assert_eq!(count1, 0);
@@ -362,7 +359,7 @@ mod tests {
     }
 
     #[test]
-    fn get_neighbor_count00() {
+    fn get_neighbor_count_00() {
         let mut board = Board::new(&vec!());
         let count1 = board.get_neighbor_count(0, 0);
         assert_eq!(count1, 0);
@@ -376,6 +373,27 @@ mod tests {
         board.cells[0][SIZE - 1].on();
         let count3 = board.get_neighbor_count(0, 0);
         assert_eq!(count3, 6);
+    }
+
+    #[test]
+    fn get_neighbor_count_bottom_left_corner() {
+        let mut board = Board::new(&vec!());
+        let count1 = board.get_neighbor_count(SIZE - 1, 0);
+        assert_eq!(count1, 0);
+        board.cells[0][0].on();
+        let count2 = board.get_neighbor_count(SIZE - 1, 0);
+        assert_eq!(count2, 1);
+        board.cells[SIZE - 1][SIZE - 1].on();
+        board.cells[0][1].on();
+        let count3 = board.get_neighbor_count(SIZE - 1, 0);
+        assert_eq!(count3, 3);
+        board.cells[0][SIZE - 1].on();
+        board.cells[SIZE - 2][0].on();
+        board.cells[SIZE - 2][1].on();
+        board.cells[SIZE - 1][1].on();
+        board.cells[SIZE - 2][SIZE - 1].on();
+        let count4 = board.get_neighbor_count(SIZE - 1, 0);
+        assert_eq!(count4, 8);
     }
 
     #[test]
