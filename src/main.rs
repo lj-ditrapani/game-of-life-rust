@@ -131,8 +131,7 @@ impl Board {
         p.get_neighbor_coords().iter()
             .map(|&Point { x, y }| { self.cells[x][y].live })
             .filter(|&z| z == true)
-            .collect::<Vec<bool>>()
-            .len() as u8
+            .count() as u8
     }
 
     fn step(&mut self) {
@@ -229,7 +228,7 @@ fn main() {
             "
         );
         println!("Pick a demo; enter a number between 1 to {}.\n\
-                 Enter q to quit.", games.len());
+                 Input q to quit.", games.len());
         let mut game = String::new();
         std::io::stdin().read_line(&mut game).unwrap();
         if game.trim() == "q" {
@@ -256,7 +255,7 @@ fn main() {
             }
             board.print();
             board.step();
-            println!("Press enter to generate next board.\nEnter q to quit.");
+            println!("Press enter to generate next board.\nInput q to quit.");
         }
     }
 }
