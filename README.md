@@ -34,6 +34,23 @@ To publish a new version:
     cargo publish
 
 
+Test Coverage
+-------------
+
+<https://github.com/xd009642/tarpaulin>
+
+```
+sudo apt-get install pkg-config cmake zlib1g-dev
+RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install cargo-tarpaulin
+```
+
+Takes forever to compile tarpaulin.
+
+```
+cargo tarpaulin -v
+```
+
+
 License
 -------
 
@@ -57,5 +74,6 @@ be dual licensed as above, without any additional terms or conditions.
 TODO
 ----
 
-- 16 X 16 is a little small...
 - put tests in separate file
+- rustfmt
+- how to write tests with fakes/mocks?
