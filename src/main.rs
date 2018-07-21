@@ -8,13 +8,14 @@ const SIZE_I8: i8 = SIZE as i8;
 
 type Offset = (i8, i8);
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 const NEIGHBOR_OFFSETS: [Offset; 8] = [
     (-1, -1), (-1, 0), (-1, 1),
     ( 0, -1),          ( 0, 1),
     ( 1, -1), ( 1, 0), ( 1, 1)
 ];
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 struct Point {
     x: usize,
     y: usize,
@@ -31,12 +32,12 @@ impl Point {
     fn point_with_offset(&self, dx: i8, dy: i8) -> Point {
         Point {
             x: Point::value_with_offset(self.x, dx),
-            y: Point::value_with_offset(self.y, dy)
+            y: Point::value_with_offset(self.y, dy),
         }
     }
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 struct Cell {
     live: bool,
     neighbor_count: u8,
@@ -44,7 +45,10 @@ struct Cell {
 
 impl Cell {
     fn new() -> Cell {
-        Cell { live: false, neighbor_count: 0 }
+        Cell {
+            live: false,
+            neighbor_count: 0,
+        }
     }
 
     fn on(&mut self) {
@@ -72,7 +76,7 @@ impl Cell {
                     true => write!(t, "/o.o\\").unwrap(),
                     false => write!(t, "\\---/").unwrap(),
                 }
-            },
+            }
             false => {
                 t.fg(term::color::BRIGHT_BLACK).unwrap();
                 t.bg(term::color::BLUE).unwrap();
@@ -80,19 +84,21 @@ impl Cell {
                     true => write!(t, "|    ").unwrap(),
                     false => write!(t, "|____").unwrap(),
                 }
-            },
+            }
         };
     }
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 struct Board {
-    cells: [[Cell; SIZE]; SIZE]
+    cells: [[Cell; SIZE]; SIZE],
 }
 
 impl Board {
     fn new(points: &Vec<(usize, usize)>) -> Board {
-        let mut board = Board { cells: [[Cell::new(); SIZE]; SIZE] };
+        let mut board = Board {
+            cells: [[Cell::new(); SIZE]; SIZE],
+        };
         for &(x, y) in points {
             board.cells[x][y].on();
         }
@@ -161,6 +167,7 @@ impl Board {
 }
 
 fn main() {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     let games = vec!(
         // Blinkers
         vec!(
@@ -222,10 +229,12 @@ fn main() {
              4: R-pentomino\n\
              5: Diehard\n\
              6: Acorn\n\
-            "
+             "
         );
-        println!("Pick a demo; enter a number between 1 to {}.\n\
-                 Input q to quit.", games.len());
+        println!(
+            "Pick a demo; enter a number between 1 to {}.\nInput q to quit.",
+            games.len()
+        );
         let mut game = String::new();
         std::io::stdin().read_line(&mut game).unwrap();
         if game.trim() == "q" {
@@ -259,7 +268,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{SIZE, Cell, Board, Point};
+    use super::{Board, Cell, Point, SIZE};
 
     fn set_cell(cell: &mut Cell, live: bool, count: u8) {
         cell.live = live;
@@ -303,14 +312,17 @@ mod tests {
 
     #[test]
     fn cell_update_life_state() {
-        let mut c = Cell { neighbor_count: 3, live: false };
+        let mut c = Cell {
+            neighbor_count: 3,
+            live: false,
+        };
         c.update_life_state();
         assert_eq!(c.live, true);
     }
 
     #[test]
     fn new_board() {
-        let b = Board::new(&vec!());
+        let b = Board::new(&vec![]);
         assert_eq!(b.cells.len(), SIZE);
         assert_eq!(b.cells[0].len(), SIZE);
     }
@@ -345,7 +357,7 @@ mod tests {
 
     #[test]
     fn get_neighbor_count_11() {
-        let mut board = Board::new(&vec!());
+        let mut board = Board::new(&vec![]);
         let count1 = board.get_neighbor_count(1, 1);
         assert_eq!(count1, 0);
         board.cells[0][0].on();
@@ -360,7 +372,7 @@ mod tests {
 
     #[test]
     fn get_neighbor_count_00() {
-        let mut board = Board::new(&vec!());
+        let mut board = Board::new(&vec![]);
         let count1 = board.get_neighbor_count(0, 0);
         assert_eq!(count1, 0);
         board.cells[0][1].on();
@@ -377,7 +389,7 @@ mod tests {
 
     #[test]
     fn get_neighbor_count_bottom_left_corner() {
-        let mut board = Board::new(&vec!());
+        let mut board = Board::new(&vec![]);
         let count1 = board.get_neighbor_count(SIZE - 1, 0);
         assert_eq!(count1, 0);
         board.cells[0][0].on();
@@ -398,7 +410,7 @@ mod tests {
 
     #[test]
     fn update_neighbor_count() {
-        let mut board = Board::new(&vec!());
+        let mut board = Board::new(&vec![]);
         board.update_neighbor_count(0, 0);
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
@@ -409,7 +421,7 @@ mod tests {
 
     #[test]
     fn update_neighbor_counts() {
-        let mut board = Board::new(&vec!());
+        let mut board = Board::new(&vec![]);
         board.update_neighbor_counts();
         assert_eq!(board.cells[0][0].neighbor_count, 0);
         board.cells[0][1].on();
@@ -419,7 +431,7 @@ mod tests {
 
     #[test]
     fn update_life_states() {
-        let coords = vec!((0, 0), (0, SIZE - 1), (2, 0));
+        let coords = vec![(0, 0), (0, SIZE - 1), (2, 0)];
         let mut board = Board::new(&coords);
         board.update_neighbor_counts();
         board.update_life_states();
